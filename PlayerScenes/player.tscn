@@ -1,0 +1,116 @@
+[gd_scene format=3 uid="uid://uku8wu1vcqpq"]
+
+[ext_resource type="PackedScene" uid="uid://cpx8awe53l0v5" path="res://ObjectScenes/coin.tscn" id="1_odfbu"]
+[ext_resource type="Texture2D" uid="uid://dcsohspls5j14" path="res://Untitled_design-removebg-preview.png" id="2_odfbu"]
+[ext_resource type="Texture2D" uid="uid://bb3sr5c54it56" path="res://ObjectScenes/Pi7-Image-Cropper.png" id="3_4wx8b"]
+
+[sub_resource type="GDScript" id="GDScript_xrivr"]
+resource_name = "PlayerMove"
+script/source = "extends CharacterBody2D
+
+
+var SPEED = 600.0
+const JUMP_VELOCITY = -600.0
+const ACCELARATION = 12
+const FRICTION = 17
+var moveState : float
+var cutOffMultiplier := 0.7
+const HOVER_SPEED: float = 3.0   
+const HOVER_HEIGHT: float = 8.0
+var time_passed: float = 0.0
+var ontardi = false
+
+
+func _physics_process(delta: float) -> void:
+	# Add the gravity.
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+
+	# Handle jump.
+	if Input.is_action_just_pressed(\"jump\"):
+		$JumpBufferTimer.start()
+		
+		
+	if is_on_floor() and !$JumpBufferTimer.is_stopped():
+		velocity.y = JUMP_VELOCITY
+	
+	if Input.is_action_just_released(\"jump\"):
+		velocity.y *= cutOffMultiplier
+		
+	
+
+	
+	var direction := Input.get_axis(\"left\", \"right\")
+	if direction != 0:
+		moveState = ACCELARATION
+	else:
+		moveState = FRICTION
+		
+
+		
+	var targetSpeed = SPEED * direction
+	
+	velocity.x = lerp(velocity.x, targetSpeed, moveState * delta)
+	
+	
+	
+	if direction == -1:
+		if ontardi == false:
+			$Sprite2D.texture = load(\"res://PlayerScenes/leftran.png\")
+		move_and_slide()
+	elif direction == 1:
+		if ontardi == false:
+			$Sprite2D.texture = load(\"res://PlayerScenes/rightrre.png\")
+		move_and_slide()
+	else:
+		if ontardi == false:
+			$Sprite2D.texture = load(\"res://PlayerScenes/idlrre.png\")
+		move_and_slide()
+	
+	time_passed += delta
+	
+	
+	if Input.is_action_just_pressed(\"tardi\"):
+		$Sprite2D.texture = load(\"res://ObjectScenes/Pi7-Image-Cropper.png\")
+		ontardi = true
+		move_and_slide()
+
+	
+"
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xrivr"]
+radius = 54.0
+height = 378.0
+
+[node name="Player" type="Node2D" unique_id=102509719]
+
+[node name="coin" parent="." unique_id=1081166799 instance=ExtResource("1_odfbu")]
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="." unique_id=475318368 groups=["player"]]
+script = SubResource("GDScript_xrivr")
+
+[node name="Camera2D" type="Camera2D" parent="CharacterBody2D" unique_id=1580774618]
+position_smoothing_enabled = true
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D" unique_id=1273520030]
+position = Vector2(2, 3)
+scale = Vector2(0.407, 0.5)
+texture = ExtResource("2_odfbu")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CharacterBody2D" unique_id=1442284213]
+position = Vector2(2, 49)
+shape = SubResource("CapsuleShape2D_xrivr")
+
+[node name="JumpBufferTimer" type="Timer" parent="CharacterBody2D" unique_id=1423677588]
+wait_time = 0.5
+one_shot = true
+
+[node name="DashTimer" type="Timer" parent="CharacterBody2D" unique_id=598602451]
+wait_time = 0.77
+one_shot = true
+autostart = true
+
+[node name="Pi7ImageCropper" type="Sprite2D" parent="CharacterBody2D" unique_id=1857206396]
+position = Vector2(259, 1175)
+scale = Vector2(0.64735717, 0.72173434)
+texture = ExtResource("3_4wx8b")
